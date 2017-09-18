@@ -24,8 +24,10 @@ import org.ros.address.BindAddress;
 import org.ros.address.PrivateAdvertiseAddressFactory;
 import org.ros.address.PublicAdvertiseAddressFactory;
 import org.ros.exception.RosRuntimeException;
-import org.ros.internal.message.DefaultMessageFactory;
 import org.ros.internal.message.DefaultMessageSerializationFactory;
+import org.ros.internal.message.DefaultMessageClassAndFieldsProvider;
+import org.ros.internal.message.FastMessageFactory;
+import org.ros.internal.message.MessageClassAndFieldsProvider;
 import org.ros.internal.message.service.ServiceDescriptionFactory;
 import org.ros.internal.message.service.ServiceRequestMessageFactory;
 import org.ros.internal.message.service.ServiceResponseMessageFactory;
@@ -179,13 +181,14 @@ public class NodeConfiguration {
   }
 
   private NodeConfiguration() {
+    MessageClassAndFieldsProvider messageClassAndFieldsProvider = new DefaultMessageClassAndFieldsProvider();
     MessageDefinitionProvider messageDefinitionProvider = new MessageDefinitionReflectionProvider();
     setTopicDescriptionFactory(new TopicDescriptionFactory(messageDefinitionProvider));
-    setTopicMessageFactory(new DefaultMessageFactory(messageDefinitionProvider));
+    setTopicMessageFactory(new FastMessageFactory(messageClassAndFieldsProvider));
     setServiceDescriptionFactory(new ServiceDescriptionFactory(messageDefinitionProvider));
     setServiceRequestMessageFactory(new ServiceRequestMessageFactory(messageDefinitionProvider));
     setServiceResponseMessageFactory(new ServiceResponseMessageFactory(messageDefinitionProvider));
-    setMessageSerializationFactory(new DefaultMessageSerializationFactory(messageDefinitionProvider));
+    setMessageSerializationFactory(new DefaultMessageSerializationFactory(messageDefinitionProvider, messageClassAndFieldsProvider));
     setParentResolver(NameResolver.newRoot());
     setTimeProvider(new WallTimeProvider());
   }
